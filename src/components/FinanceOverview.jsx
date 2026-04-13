@@ -37,27 +37,27 @@ function FinanceOverview({ transactions = [], activeTab, onChangeTab }) {
   return (
     <div className="overview-wrapper">
       <div className="top-tabs">
-        <button
-          className={activeTab === 'expense' ? 'top-tab active' : 'top-tab'}
-          onClick={() => onChangeTab('expense')}
-        >
-          Расходы
-        </button>
+  <button
+    className={activeTab === 'accounts' ? 'top-tab active' : 'top-tab'}
+    onClick={() => onChangeTab('accounts')}
+  >
+    Счета
+  </button>
 
-        <button
-          className={activeTab === 'income' ? 'top-tab active' : 'top-tab'}
-          onClick={() => onChangeTab('income')}
-        >
-          Доходы
-        </button>
+  <button
+    className={activeTab === 'income' ? 'top-tab active' : 'top-tab'}
+    onClick={() => onChangeTab('income')}
+  >
+    Доходы
+  </button>
 
-        <button
-          className={activeTab === 'accounts' ? 'top-tab active' : 'top-tab'}
-          onClick={() => onChangeTab('accounts')}
-        >
-          Счета
-        </button>
-      </div>
+  <button
+    className={activeTab === 'expense' ? 'top-tab active' : 'top-tab'}
+    onClick={() => onChangeTab('expense')}
+  >
+    Расходы
+  </button>
+</div>
 
       <div className="overview-period-row">
         <div className="overview-period">1 апр. - 30 апр.</div>

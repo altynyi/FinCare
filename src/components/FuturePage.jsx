@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import CreateGoalModal from './CreateGoalModal';
 
 function formatMoney(value) {
   return Number(value || 0).toLocaleString('ru-RU');
@@ -30,6 +31,7 @@ function isUntouchedGoal(card) {
 function FuturePage() {
   const [goalCards, setGoalCards] = useState([]);
   const [selectedGoalId, setSelectedGoalId] = useState(null);
+  const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
   const fileInputRefs = useRef({});
 
   const selectedGoal =
@@ -68,18 +70,16 @@ function FuturePage() {
   };
 
   const handleAddGoalCard = () => {
-    cleanupUntouchedGoals();
+  cleanupUntouchedGoals();
+  setIsCreateGoalModalOpen(true);
+};
 
-    const title = window.prompt('Введите название цели:');
-    if (!title || !title.trim()) {
-      return;
-    }
-
-    const newGoal = createGoalCard(title.trim());
-
-    setGoalCards((prev) => [...prev, newGoal]);
-    setSelectedGoalId(newGoal.id);
-  };
+const handleCreateGoal = (title) => {
+  const newGoal = createGoalCard(title);
+  setGoalCards((prev) => [...prev, newGoal]);
+  setSelectedGoalId(newGoal.id);
+  setIsCreateGoalModalOpen(false);
+};
 
   const handleSelectGoal = (id) => {
     cleanupUntouchedGoals(id);
@@ -409,8 +409,14 @@ function FuturePage() {
               </>
             );
           })()}
+
         </div>
       )}
+      <CreateGoalModal
+  isOpen={isCreateGoalModalOpen}
+  onClose={() => setIsCreateGoalModalOpen(false)}
+  onCreate={handleCreateGoal}
+/>
     </div>
   );
 }

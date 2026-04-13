@@ -11,6 +11,8 @@ import HistoryByDate from './components/HistoryByDate';
 import FloatingAddButton from './components/FloatingAddButton';
 import RegisterPage from './components/RegisterPage';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
+import DailyLimitCalculator from './components/DailyLimitCalculator';
+import TransactionModal from './components/TransactionModal';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,8 +21,7 @@ function App() {
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const [activeTab, setActiveTab] = useState('expense');
-  const [showForm, setShowForm] = useState(false);
+const [activeTab, setActiveTab] = useState('accounts');  const [showForm, setShowForm] = useState(false);
   const [userName, setUserName] = useState('');
   const [transactionToDelete, setTransactionToDelete] = useState(null);
 
@@ -69,16 +70,22 @@ function App() {
   const handleDeleteTransaction = async () => {
   if (!transactionToDelete) return;
 
+  const idToDelete = transactionToDelete.id;
+
+  setTransactionToDelete(null);
+
+  const previousTransactions = transactions;
+  const updatedTransactions = transactions.filter((tx) => tx.id !== idToDelete);
+
+  setTransactions(updatedTransactions);
+
   try {
-    setLoading(true);
-    await axios.delete(`${API_URL}/api/transactions/${transactionToDelete.id}`);
-    await reloadAllData();
-    setTransactionToDelete(null);
+    await axios.delete(`${API_URL}/api/transactions/${idToDelete}`);
+    fetchAIAdvice();
   } catch (error) {
     console.error(error);
+    setTransactions(previousTransactions);
     alert('Не удалось удалить транзакцию');
-  } finally {
-    setLoading(false);
   }
 };
 
@@ -93,7 +100,7 @@ function App() {
 
         <div className="user-header">
   <h1>
-    {currentPage === 'future' && 'Прогноз на будущее'}
+    {currentPage === 'future' && 'Мои хотелки'}
     {currentPage === 'achievements' && 'Достижения'}
   </h1>
 
@@ -108,38 +115,39 @@ function App() {
 </div>
 
         {currentPage === 'dashboard' && (
-          <>
-            <DashboardCards stats={aiData?.stats} />
+  <>
+    {activeTab === 'accounts' && (
+  <>
+    <DashboardCards stats={aiData?.stats} />
 
-            <FinanceOverview
-              transactions={transactions}
-              activeTab={activeTab}
-              onChangeTab={setActiveTab}
-            />
+    <DailyLimitCalculator balance={aiData?.stats?.balance ?? 0} />
 
-            <FinancePet
-              pet={aiData?.stats?.pet}
-              userName={userName}
-            />
+    <FinancePet
+      pet={aiData?.stats?.pet}
+      userName={userName}
+    />
+  </>
+)}
 
-            {showForm && (
-              <TransactionForm onSubmit={handleAddTransaction} loading={loading} />
-            )}
+    <FinanceOverview
+      transactions={transactions}
+      activeTab={activeTab}
+      onChangeTab={setActiveTab}
+    />
 
-            {activeTab !== 'accounts' && (
-              <HistoryByDate
-  transactions={
-    activeTab === 'expense'
-      ? transactions.filter((t) => t.type === 'expense')
-      : transactions.filter((t) => t.type === 'income')
-  }
-  onAskDeleteTransaction={setTransactionToDelete}
-/>
-            )}
+    {activeTab !== 'accounts' && (
+      <HistoryByDate
+        transactions={
+          activeTab === 'expense'
+            ? transactions.filter((t) => t.type === 'expense')
+            : transactions.filter((t) => t.type === 'income')
+        }
+        onAskDeleteTransaction={setTransactionToDelete}
+      />
+    )}
 
-            <FloatingAddButton onClick={() => setShowForm((prev) => !prev)} />
-          </>
-        )}
+<FloatingAddButton onClick={() => setShowForm(true)} />  </>
+)}
 
         {currentPage === 'future' && (
           <FuturePage future={aiData?.stats?.future} />
@@ -154,6 +162,18 @@ function App() {
   onConfirm={handleDeleteTransaction}
 />
       </div>
+      <TransactionModal
+  isOpen={showForm}
+  onClose={() => setShowForm(false)}
+>
+  <TransactionForm
+    onSubmit={async (data) => {
+      await handleAddTransaction(data);
+      setShowForm(false);
+    }}
+    loading={loading}
+  />
+</TransactionModal>
     </div>
   );
 }

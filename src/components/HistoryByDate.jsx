@@ -17,9 +17,11 @@ function groupTransactionsByDate(transactions = []) {
 
   transactions.forEach((tx) => {
     const key = tx.transaction_date || 'Без даты';
+
     if (!grouped[key]) {
       grouped[key] = [];
     }
+
     grouped[key].push(tx);
   });
 
@@ -41,7 +43,10 @@ function HistoryByDate({ transactions = [], onAskDeleteTransaction }) {
         <div className="history-card">Пока нет транзакций</div>
       ) : (
         grouped.map(([date, items]) => {
-          const total = items.reduce((sum, item) => sum + Number(item.amount), 0);
+          const total = items.reduce(
+            (sum, item) => sum + Number(item.amount),
+            0
+          );
 
           return (
             <div className="history-card" key={date}>
@@ -55,9 +60,13 @@ function HistoryByDate({ transactions = [], onAskDeleteTransaction }) {
                   <div className="history-item" key={tx.id}>
                     <div className="history-item-main">
                       <div className="history-item-row">
-                        <div className="history-item-category">{tx.category}</div>
+                        <div className="history-item-category">
+                          {tx.category}
+                        </div>
                         <div className="history-item-dots" />
-                        <div className="history-item-amount">{formatMoney(tx.amount)}</div>
+                        <div className="history-item-amount">
+                          {formatMoney(tx.amount)}
+                        </div>
                       </div>
 
                       <div className="history-item-subtitle">{tx.title}</div>
@@ -67,9 +76,9 @@ function HistoryByDate({ transactions = [], onAskDeleteTransaction }) {
                       className="history-delete-button"
                       onClick={() => onAskDeleteTransaction(tx)}
                       title="Удалить"
-                    >
-                      ×
-                    </button>
+                      aria-label="Удалить"
+                      type="button"
+                    />
                   </div>
                 ))}
               </div>
